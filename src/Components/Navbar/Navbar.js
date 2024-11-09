@@ -1,89 +1,40 @@
-import React, { useEffect, useState } from 'react';
-import './PlayVideo.css';
-import like from '../../assets/like.png';
-import dislike from '../../assets/dislike.png';
-import share from '../../assets/share.png';
-import save from '../../assets/save.png';
-import { value_converter } from '../../data';
-import moment from 'moment';
+import React from 'react';
+import './Navbar.css';
+import menu_icon from '../../assets/menu.png';
+import logo from '../../assets/logo.png';
+import search_icon from '../../assets/search.png';
+import upload_icon from '../../assets/upload.png';
+import more_icon from '../../assets/more.png';
+import notification_icon from '../../assets/notification.png';
+import user1 from '../../assets/user_profile.jpg';
+import { Link } from 'react-router-dom';
 
-const PlayVideo = ({ videoId }) => {
+const Navbar = ({ setSidebar }) => {
 
-    const [apiData, setApiData] = useState(null);
-    const [channelData, setChannelData] = useState(null);
-    const [commentData, setCommentData] = useState([]);
-
-    const fetchVideoData = async () => {
-        const videoDetails_url = `https://youtube.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatistics&key=${process.env.REACT_APP_API_KEY}&id=${videoId}`;
-        await fetch(videoDetails_url).then(res => res.json()).then(data => setApiData(data.items[0]));
+    const sidebar_toggle = () => {
+        setSidebar((prev) => !prev);
     };
-
-    const fetchOtherData = async () => {
-        const channelLogo_url = `https://youtube.googleapis.com/youtube/v3/channels?part=snippet%2CcontentDetails%2Cstatistics&id=${apiData.snippet.channelId}&key=${process.env.REACT_APP_API_KEY}`;
-        await fetch(channelLogo_url).then(res => res.json()).then(data => setChannelData(data.items[0]));
-
-        const videoComment_url = `https://www.googleapis.com/youtube/v3/commentThreads?textFormat=plainText&part=snippet&maxResults=50&key=${process.env.REACT_APP_API_KEY}&videoId=${videoId}`;
-        await fetch(videoComment_url).then(res => res.json()).then(data => setCommentData(data.items));
-    };
-
-    useEffect(() => {
-        fetchVideoData();
-        window.scrollTo(0, 0);
-    }, []);
-
-    useEffect(() => {
-        if (apiData) fetchOtherData();
-    }, [apiData]);
 
     return (
-        <div className="play-video">
-            <iframe
-                src={`https://www.youtube.com/embed/${videoId}?&autoplay=1`}
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-            ></iframe>
-            <h3>{apiData ? apiData.snippet.title : "Title Here"}</h3>
-            <div className="play-video-info">
-                <p>{apiData ? value_converter(apiData.statistics.viewCount) : 1525} Views  &bull; {apiData ? moment(apiData.snippet.publishedAt).fromNow() : "2 days ago"}</p>
-                <div>
-                    <span><img src={like} alt="" />{apiData ? value_converter(apiData.statistics.likeCount) : 125}</span>
-                    <span><img src={dislike} alt="" />2</span>
-                    <span><img src={share} alt="" />Share</span>
-                    <span><img src={save} alt="" />Save</span>
+        <nav className='flex-div'>
+            <div className="nav-left flex-div">
+                <img src={menu_icon} alt="Menu" className="menu-icon" onClick={sidebar_toggle} />
+                <Link to='/'> <img src={logo} alt="Logo" className="logo" /></Link>
+            </div>
+            <div className="nav-middle flex-div">
+                <div className="search-box flex-div">
+                    <input type="text" placeholder="Search" />
+                    <img src={search_icon} alt="Search" />
                 </div>
             </div>
-            <hr />
-            <div className="publisher">
-                <img src={channelData ? channelData.snippet.thumbnails.default.url : ""} alt="" />
-                <div>
-                    <p>{apiData ? apiData.snippet.channelTitle : ""}</p>
-                    <span>{channelData ? value_converter(channelData.statistics.subscriberCount) : "1M"} Subscribers</span>
-                </div>
-                <button type="button">Subscribe</button>
+            <div className="nav-right flex-div">
+                <img src={upload_icon} alt="Upload" />
+                <img src={more_icon} alt="More" />
+                <img src={notification_icon} alt="Notifications" />
+                <img src={user1} alt="User" className="user-icon" />
             </div>
-            <div className="vid-description">
-                <p>{apiData ? apiData.snippet.description.slice(0, 250) : "Description Here"}</p>
-                <hr />
-                <h4>{apiData ? value_converter(apiData.statistics.commentCount) : 130} Comments</h4>
-
-                {commentData.map((item, index) => (
-                    <div key={index} className="comment">
-                        <img src={item.snippet.topLevelComment.snippet.authorProfileImageUrl} alt="" />
-                        <div>
-                            <h3>{item.snippet.topLevelComment.snippet.authorDisplayName} <span>{moment(item.snippet.topLevelComment.snippet.publishedAt).fromNow()}</span></h3>
-                            <p>{item.snippet.topLevelComment.snippet.textDisplay}</p>
-                            <div className="comment-action">
-                                <img src={like} alt="" />
-                                <span>{item.snippet.topLevelComment.snippet.likeCount}</span>
-                                <img src={dislike} alt="" />
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
+        </nav>
     );
 };
 
-export default PlayVideo;
+export default Navbar;
