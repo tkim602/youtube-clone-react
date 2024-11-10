@@ -1,4 +1,4 @@
-.recommended{
+.recommend{
     flex-basis: 30%;
 }
 .side-video-list{
@@ -19,17 +19,17 @@
     font-size: 13px;
     margin-bottom: 5px;
 }
-.recommended p{
+.recommend p{
     font-size: 14px;
     font-weight: 500;
 }
-.recommended .recommended-views{
+.recomme .recommend-views{
     font-size: 12px;
     font-weight: 400;
 }
 
 @media (max-width: 900px){
-    .recommended{
+    .recommend{
         flex-basis: 100%;
     }
    
