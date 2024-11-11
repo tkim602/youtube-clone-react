@@ -1,27 +1,80 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { gapi } from 'gapi-script';
 import './Sidebar.css';
 import home from '../../assets/home.png';
 import game_icon from '../../assets/game_icon.png';
 import automobiles from '../../assets/automobiles.png';
 import explore from '../../assets/explore.png';
-import subscriprion from '../../assets/subscriprion.png';
+import subscriptions from '../../assets/subscriprion.png';
 import sports from '../../assets/sports.png';
 import entertainment from '../../assets/entertainment.png';
 import tech from '../../assets/tech.png';
 import music from '../../assets/music.png';
 import blogs from '../../assets/blogs.png';
 import news from '../../assets/news.png';
+import download from '../../assets/download_icon.jpg';
+import shorts from '../../assets/shorts.png';
+import watchLater from '../../assets/watchlater.png';
+import videos from '../../assets/yourVideos.png';
+import liked from '../../assets/likedVideos.png';
+import history from '../../assets/history_new.png';
+import playlists from '../../assets/playlist.png';
 import user1 from '../../assets/user_profile.jpg';
 import user2 from '../../assets/user_profile.jpg';
 import user3 from '../../assets/user_profile.jpg';
 import user4 from '../../assets/user_profile.jpg';
 import user5 from '../../assets/user_profile.jpg';
 
+const CLIENT_ID = process.env.REACT_APP_YOUTUBE_CLIENT_ID;
+const API_KEY = process.env.REACT_APP_YOUTUBE_API_KEY;
+const SCOPES = 'https://www.googleapis.com/auth/youtube.readonly';
+
 const Sidebar = ({ sidebar, category, setCategory }) => {
+  const [channelId, setChannelId] = useState('');
+
+  useEffect(() => {
+    // Load gapi script
+    const initializeGapi = () => {
+      if (window.gapi) {
+        window.gapi.load('client:auth2', start);
+      } else {
+        console.error("Google API script not loaded.");
+      }
+    };
+
+    const start = () => {
+      gapi.client
+        .init({
+          apiKey: API_KEY,
+          clientId: CLIENT_ID,
+          scope: SCOPES,
+        })
+        .then(() => {
+          return gapi.auth2.getAuthInstance().signIn();
+        })
+        .then(() => {
+          return gapi.client.youtube.channels.list({
+            mine: true,
+            part: 'id',
+          });
+        })
+        .then((response) => {
+          const id = response.result.items[0].id;
+          setChannelId(id);
+        })
+        .catch((error) => {
+          console.error("Error fetching channel ID:", error);
+        });
+    };
+
+    // Delay the initialization to ensure gapi loads correctly
+    setTimeout(initializeGapi, 1000);
+  }, []);
+
   return (
     <div className={`sidebar ${sidebar ? "" : "small-sidebar"}`}>
       
-      {/* Main Navigation, all of them still have some issue and continue from here */}
+      {/* Main Navigation */}
       <div className="shortcut-links">
         <div onClick={() => setCategory(0)} className={`side-link ${category === 0 ? "active" : ""}`}>
           <img src={home} alt="Home" />
@@ -37,8 +90,16 @@ const Sidebar = ({ sidebar, category, setCategory }) => {
         </div>
         <hr />
 
-        {/* You Section */}
-        <div className="side-section-title">You</div>
+        {/* You Section with dynamic link to user's channel */}
+        <div className="side-section-title">
+          {channelId ? (
+            <a href={`https://www.youtube.com/channel/${channelId}`} target="_blank" rel="noopener noreferrer" className="you-link">
+              You <span>&gt;</span>
+            </a>
+          ) : (
+            'Loading...'
+          )}
+        </div>
         <div onClick={() => setCategory("history")} className={`side-link ${category === "history" ? "active" : ""}`}>
           <img src={history} alt="History" />
           <p>History</p>
@@ -65,7 +126,7 @@ const Sidebar = ({ sidebar, category, setCategory }) => {
         </div>
         <hr />
 
-        {/* Explore Section */} 
+        {/* Explore Section */}
         <div className="side-section-title">Explore</div>
         <div onClick={() => setCategory(20)} className={`side-link ${category === 20 ? "active" : ""}`}>
           <img src={game_icon} alt="Gaming" />
