@@ -1,2 +1,1 @@
-1. gapi error resolve 부터
-
+1. gapi error 
